@@ -6,6 +6,8 @@ A simple dataset of Biblical languages in JSON and CSV formats. This repository 
 
 -   `greek.json`: A JSON file containing the index and Greek words.
 -   `greek.csv`: A CSV file containing the index and Greek words.
+-   `hebrew.json`: A JSON file containing the index and Hebrew words.
+-   `hebrew.csv`: A CSV file containing the index and Hebrew words.
 
 ## Overview
 
@@ -21,13 +23,16 @@ This dataset includes:
 ```json
 {
     "G0001": {
-        "word": "Α, ἄλφα"
+        "word": ["Α", "ἄλφα"],
+        "transliteration": ["A", "alpha"]
     },
     "G0002": {
-        "word": "Ἀαρών"
+        "word": ["Ἀαρών"],
+        "transliteration": ["Aaron"]
     },
     "G0003": {
-        "word": "Ἀβαδδών"
+        "word": ["Ἀβαδδών"],
+        "transliteration": ["Abaddon"]
     }
     // ... additional entries
 }
@@ -36,10 +41,10 @@ This dataset includes:
 **CSV Format (`greek.csv`):**
 
 ```csv
-index,word
-G0001,"Α, ἄλφα"
-G0002,Ἀαρών
-G0003,Ἀβαδδών
+index,transliteration,word
+G0001,"A, alpha","Α, ἄλφα"
+G0002,Aaron,Ἀαρών
+G0003,Abaddon,Ἀβαδδών
 // ... additional entries
 ```
 
@@ -59,14 +64,15 @@ import json
 
 # Load Strong's Greek numbers from JSON file
 with open('greek.json', 'r', encoding='utf-8') as f:
-    greek = json.load(f)
+    greek_data = json.load(f)
 
 # Access a specific entry
 strongs_number = 'G0001'
-entry = greek.get(strongs_number)
+entry = greek_data.get(strongs_number)
 if entry:
     print(f"Strong's Number: {strongs_number}")
-    print(f"Greek Word: {entry['word']}")
+    print(f"Greek Words: {entry['word']}")
+    print(f"Transliterations: {entry['transliteration']}")
 else:
     print(f"Entry {strongs_number} not found.")
 ```
@@ -81,12 +87,21 @@ import pandas as pd
 # Load the CSV data
 df = pd.read_csv('greek.csv')
 
-# Access a specific entry
+# Access entries for a specific Strong's number
 strongs_number = 'G0001'
-entry = df[df['index'] == strongs_number]
-if not entry.empty:
-    print(f"Strong's Number: {entry.iloc[0]['index']}")
-    print(f"Greek Word: {entry.iloc[0]['word']}")
+entries = df[df['strongs_number'] == strongs_number]
+if not entries.empty:
+    greek_words = []
+    transliterations = []
+    for _, row in entries.iterrows():
+        # Split the Greek words and transliterations into lists
+        words = row['greek_word'].split(", ")
+        translits = row['transliteration'].split(", ")
+        greek_words.extend(words)
+        transliterations.extend(translits)
+    print(f"Strong's Number: {strongs_number}")
+    print(f"Greek Words: {greek_words}")
+    print(f"Transliterations: {transliterations}")
 else:
     print(f"Entry {strongs_number} not found.")
 ```
@@ -130,4 +145,4 @@ While the original Strong's numbers are in the public domain, this compiled data
 
 ---
 
-**Note:** This dataset currently includes only the Strong's numbers as indexes and the corresponding Greek words. Definitions, pronunciations, or additional lexical information are not yet included. If you require more comprehensive data, feel free to open an issue or consider integrating this dataset with other resources or lexicons that provide detailed entries.
+**Note:** This dataset now includes Strong’s numbers as indexes, the corresponding Greek words, and their transliterations. Each Strong’s number may have multiple Greek words and transliterations associated with it. Definitions, pronunciations, or additional lexical information are not yet included. If you require more comprehensive data, feel free to open an issue or consider integrating this dataset with other resources or lexicons that provide detailed entries.
